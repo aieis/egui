@@ -1470,6 +1470,9 @@ pub fn create_winit_window_builder<T>(
         maximize_button,
         window_level,
 
+        // x11:
+        override_redirect: _override_redirect,
+
         // macOS:
         fullsize_content_view: _fullsize_content_view,
         title_shown: _title_shown,
@@ -1514,6 +1517,13 @@ pub fn create_winit_window_builder<T>(
             buttons
         })
         .with_active(active.unwrap_or(true));
+
+    #[cfg(all(feature = "x11", target_os = "linux"))]
+    if let Some(override_redirect) = _override_redirect {
+        use winit::platform::x11::WindowBuilderExtX11 as _;
+        window_builder = window_builder.with_override_redirect(override_redirect);
+    }
+
 
     if let Some(size) = inner_size {
         window_builder = window_builder.with_inner_size(PhysicalSize::new(

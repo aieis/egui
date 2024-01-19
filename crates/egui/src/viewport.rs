@@ -298,6 +298,9 @@ pub struct ViewportBuilder {
     pub window_level: Option<WindowLevel>,
 
     pub mouse_passthrough: Option<bool>,
+
+    // X11:
+    pub override_redirect: Option<bool>,
 }
 
 impl ViewportBuilder {
@@ -573,6 +576,14 @@ impl ViewportBuilder {
         self
     }
 
+    /// ### On X11
+    /// On X11 this sets the override_redirect flag (for the window manager)
+    #[inline]
+    pub fn with_override_redirect(mut self, value: bool) -> Self {
+        self.override_redirect = Some(value);
+        self
+    }
+
     /// Update this `ViewportBuilder` with a delta,
     /// returning a list of commands and a bool intdicating if the window needs to be recreated.
     #[must_use]
@@ -602,6 +613,7 @@ impl ViewportBuilder {
             maximize_button: new_maximize_button,
             window_level: new_window_level,
             mouse_passthrough: new_mouse_passthrough,
+            override_redirect: new_override_redirect,
         } = new_vp_builder;
 
         let mut commands = Vec::new();
@@ -769,6 +781,13 @@ impl ViewportBuilder {
             self.drag_and_drop = new_drag_and_drop;
             recreate_window = true;
         }
+
+
+        if new_override_redirect.is_some() && self.override_redirect != new_override_redirect {
+            self.override_redirect = new_override_redirect;
+            recreate_window = true;
+        }
+
 
         (commands, recreate_window)
     }
